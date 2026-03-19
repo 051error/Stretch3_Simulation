@@ -5,7 +5,7 @@ A high-fidelity MuJoCo-based simulation environment for the **Hello Robot Stretc
 ![Simulation Screenshot](media/screenshot.png)
 
 # Sim-to Real Deployment
-the repo in the link below containes the sourcode and documentation for sim-to-real depoyment for this project.
+The repo in the link below containes the sourcode and documentation for sim-to-real depoyment of this project.
 [Sim-to-Real_Link](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
 
 
