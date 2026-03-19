@@ -1,3 +1,5 @@
+*This project is under development
+
 # Stretch 3 Simulation Environment
 
 A high-fidelity MuJoCo-based simulation environment for the **Hello Robot Stretch 2** platform with ROS 2 integration and interactive control.
