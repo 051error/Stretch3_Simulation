@@ -10,6 +10,8 @@ A MuJoCo-based simulation environment for the **Hello Robot Stretch 2** platform
 The repo in the link below containes the sourcode and documentation for sim-to-real depoyment of this project.
 [Sim-to-Real_Link](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
 
+![RViz SLAM localization — map, scan, and robot pose](Navigation/rviz_lidar.png)
+
 
 ## Purpose
 
