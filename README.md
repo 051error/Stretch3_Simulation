@@ -1,10 +1,12 @@
+
 *This project is under development
 
 # Stretch 3 Simulation Environment
 
 A MuJoCo-based simulation environment for the **Hello Robot Stretch 2** platform with ROS 2 integration and interactive control.
 
-![Simulation Screenshot](media/screenshot.png)
+
+<img width="878" height="304" alt="screenshot" src="https://github.com/user-attachments/assets/09aba0db-a345-40a8-bc80-a15420451ac4" />
 
 # Sim-to Real Deployment
 The repo in the link below containes the sourcode and documentation for sim-to-real depoyment of this project.
