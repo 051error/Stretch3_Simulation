@@ -27,7 +27,7 @@ The robot uses lidar for autonomous navigation and a camera for object detection
 | [![pick and place long demo + speech recognition](https://img.youtube.com/vi/5GTzTurSQr8/mqdefault.jpg)](https://youtu.be/5GTzTurSQr8) | **Multi-object + speech recognition** — full pipeline with voice-commanded macro actions |
 
 > **Sim-to-real deployment** — source code and documentation for real-world transfer:  
-> → [Stretch3-Sim-to-Real](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
+> → [Stretch3-Deployment](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
 
 ![RViz SLAM localization](https://github.com/egeozgul/Stretch3-Sim-to-Real/blob/main/Navigation/rviz_lidar.png?raw=true)
 *RViz visualization — map, lidar scan, and robot pose during SLAM localization*
