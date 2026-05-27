@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stretch3-simulation"
+version = "1.0.0"
+description = "MuJoCo simulation environment for the Hello Robot Stretch 3"
+readme = "README.md"
+requires-python = ">=3.11"
+
+[project.scripts]
+stretch-sim = "stretch_sim.cli:run_simulation"
+stretch-controller = "stretch_sim.cli:run_controller"
+stretch-verify = "stretch_sim.cli:run_verify"
+
+[tool.setuptools.packages.find]
+where = ["src"]

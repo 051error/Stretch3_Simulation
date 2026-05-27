@@ -1,18 +1,42 @@
-# Stretch 3 · Simulation Environment
+# Stretch 3 Simulation Environment
 
-![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat-square)
-![MuJoCo](https://img.shields.io/badge/MuJoCo-Physics-green?style=flat-square)
-![ROS 2](https://img.shields.io/badge/ROS_2-Jazzy-orange?style=flat-square)
-![SLAM](https://img.shields.io/badge/Nav-SLAM-purple?style=flat-square)
-![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey?style=flat-square)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-blue?style=flat-square)]()
+[![MuJoCo](https://img.shields.io/badge/MuJoCo-3.2-green?style=flat-square)]()
+[![ROS 2 Jazzy](https://img.shields.io/badge/ROS_2-Jazzy-orange?style=flat-square)]()
+[![Linux](https://img.shields.io/badge/Platform-Linux-lightgrey?style=flat-square)]()
 
-A full-stack robotics simulation environment for the Hello Robot Stretch 3 platform. Built to support sim-to-real transfer of pick-and-place manipulation tasks — integrating SLAM-based autonomous navigation, inverse kinematics, and a voice-commanded macro action system. Trained policies were successfully deployed on a physical Stretch 3 robot.
+MuJoCo-based simulation stack for the [Hello Robot Stretch 3](https://hello-robot.com/stretch-3), built for manipulation research and sim-to-real transfer. The environment couples physics simulation, a ROS 2 control interface, composable task actions, and anchor-based mobile manipulation in a kitchen pick-and-place scenario.
 
-Built around the [Macro MARL PPO](https://github.com/wwlin1198/macro_marl_ppo) model developed at Northeastern University.
+**Highlights**
 
-<br/>
-<img width="817" height="344" alt="Stretch 3 simulation environment screenshot" src="https://github.com/user-attachments/assets/2fd96ebf-b1a9-40e4-9745-c2c348ec10df" />
-<br/>
+- Deployed learned policies on a physical Stretch 3 (see [sim-to-real repo](https://github.com/egeozgul/Stretch3-Sim-to-Real))
+- Integrated with [Macro MARL PPO](https://github.com/wwlin1198/macro_marl_ppo) (Northeastern University) for macro-action planning
+- Normalized `0–1` action space designed for RL and reproducible evaluation
+
+<p align="center">
+  <img width="800" alt="Stretch 3 simulation — kitchen workspace" src="https://github.com/user-attachments/assets/2fd96ebf-b1a9-40e4-9745-c2c348ec10df" />
+</p>
+
+---
+
+## What This Repository Provides
+
+| Component | Description |
+|-----------|-------------|
+| **Physics simulation** | Stretch 3 + kitchen scene in MuJoCo (`models/`) |
+| **ROS 2 bridge** | Topics for base velocity, joints, navigation goals, and camera |
+| **Navigation** | Proportional controller to named anchors and normalized world coordinates |
+| **Manipulation** | IK solver, arm PID controllers, gripper and lift control |
+| **Action system** | YAML-defined micro/macro actions (`config/actions.yaml`) |
+| **Interfaces** | Interactive CLI, keyboard teleop, and programmatic ROS 2 clients |
+
+**End-to-end demos** (navigation, perception, speech, SLAM in RViz) use this simulator together with external ROS 2 nodes and the deployment stack linked below—not all of that logic lives in this repo alone.
+
+<p align="center">
+  <img width="800" alt="RViz — map, lidar, and robot pose during localization" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
+  <br />
+  <em>Full-system demo: SLAM and localization run on the physical robot / ROS stack; this repo supplies the sim and control interface.</em>
+</p>
 
 ---
 
@@ -20,43 +44,25 @@ Built around the [Macro MARL PPO](https://github.com/wwlin1198/macro_marl_ppo) m
 
 | Demo | Description |
 |------|-------------|
-| [![Single pick and place](https://img.youtube.com/vi/GQZBjWnBhXU/mqdefault.jpg)](https://youtu.be/GQZBjWnBhXU) | **Single pick and place** — navigates to a table, detects an object, picks and places it |
+| [![Single pick and place](https://img.youtube.com/vi/GQZBjWnBhXU/mqdefault.jpg)](https://youtu.be/GQZBjWnBhXU) | **Single pick and place** — navigate to the table, detect an object, pick, and place |
 | [![Multi-object with speech recognition](https://img.youtube.com/vi/lpIhNOAiv7I/mqdefault.jpg)](https://youtu.be/lpIhNOAiv7I) | **Multi-object + speech recognition** — full pipeline with voice-commanded macro actions |
 
-> **Sim-to-real deployment** — source code and documentation for real-world transfer on a physical Stretch 3:
-> → [Stretch3-Deployment](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
-
-<br/>
-<img width="817" alt="RViz SLAM visualization" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
-<br/>
-
-*RViz visualization — map, lidar scan, and robot pose during SLAM localization*
+> **Sim-to-real** — deployment on a physical Stretch 3: [Stretch3-Sim-to-Real](https://github.com/egeozgul/Stretch3-Sim-to-Real)
 
 ---
 
-## Overview
+## System Overview
 
-The simulation models a kitchen workspace with physical objects the robot can interact with:
+**Scene** — Kitchen workspace with a table, cutting board, knife, plates, and pickable ingredients (lettuce, onion, tomato), sized for the Stretch gripper.
 
-- **Kitchen objects** — knife, cutting board, plates
-- **Pickable ingredients** — lettuce, onion, and tomato (sized and positioned for the Stretch 3 gripper)
-- **Perception** — onboard camera for object detection; lidar for navigation and mapping
+**Typical pipeline** (across sim + deployment stack):
 
-The robot pipeline works as follows: lidar builds a map via SLAM → the robot navigates autonomously to named anchor points → the camera detects the target object → an IK solver drives the arm to pick and place it.
+1. Localize and map (SLAM on hardware / ROS — see deployment repo)
+2. Navigate to a named anchor (`A`–`F` or `ORIGIN`)
+3. Perceive target object (camera)
+4. Plan and execute pick-and-place (IK + macro actions)
 
----
-
-## Features
-
-| | |
-|---|---|
-| **Physics simulation** | MuJoCo-based realistic robot dynamics |
-| **ROS 2 integration** | Full communication stack with standard topics |
-| **Autonomous navigation** | SLAM-based localization with anchor waypoints and turn-in-place strategy |
-| **Inverse kinematics** | IK solver for precise arm positioning |
-| **Speech recognition** | Voice-commanded macro actions for high-level task control |
-| **Interactive control** | CLI with tab completion and command history |
-| **Action system** | YAML-defined micro and macro actions, composable and RL-friendly |
+**In simulation**, step 2 is handled by the built-in anchor navigator; steps 1, 3, and 4 can be exercised via ROS topics, the interactive controller, or external nodes.
 
 ---
 
@@ -64,163 +70,157 @@ The robot pipeline works as follows: lidar builds a map via SLAM → the robot n
 
 ### Prerequisites
 
-- Conda (Miniconda or Anaconda)
+- Linux
+- [Conda](https://docs.conda.io/en/latest/miniconda.html)
 - Python 3.12
-- ROS 2 Jazzy *(optional — required for ROS 2 features)*
+- [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/) (required for the full ROS workflow)
 
-### Installation
+### Install
+
+From the repository root:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/egeozgul/Stretch3_Simulation.git
 cd Stretch3_Simulation
 
-conda env create -f environment_ros2.yml
+conda env create -f environment/environment_ros2.yml
 conda activate simenv_ros2
 source /opt/ros/jazzy/setup.bash
 
-python verify_setup.py
+pip install -e .
+make verify
 ```
 
-### Running
+For MuJoCo only (no ROS 2): `conda env create -f environment/environment.yml` → env name `simenv`.
 
-**Terminal 1 — start the simulation**
+### Run
+
+**Terminal 1 — simulation**
+
 ```bash
-conda activate simenv_ros2
-source /opt/ros/jazzy/setup.bash
-python stretch_ros2_sim.py
+conda activate simenv_ros2 && source /opt/ros/jazzy/setup.bash
+make sim
 ```
 
 **Terminal 2 — interactive controller**
+
 ```bash
-conda activate simenv_ros2
-source /opt/ros/jazzy/setup.bash
-python interactive_controller.py
+conda activate simenv_ros2 && source /opt/ros/jazzy/setup.bash
+make controller
 ```
+
+| Command | Purpose |
+|---------|---------|
+| `make sim` | MuJoCo + ROS 2 simulation node |
+| `make controller` | Interactive CLI |
+| `make view` | MuJoCo viewer (world only) |
+| `make test` | ROS 2 communication smoke test |
+| `stretch-sim` / `stretch-controller` | Same as above (after `pip install -e .`) |
+| `./bin/start_ros2_sim.sh` | One-shot launcher with conda + ROS |
+
+See [docs/SETUP.md](docs/SETUP.md) and [docs/USAGE.md](docs/USAGE.md) for troubleshooting and examples.
 
 ---
 
 ## Interactive Controller
 
+```text
+stretch> help
+stretch> go_to_anchor anchor=A
+stretch> elevate_arm height=0.5
+stretch> extend_arm length=0.8
+stretch> turn_towards anchor=ORIGIN
+stretch> close_gripper
 ```
-stretch> help                         # show all available actions
-stretch> go_to_anchor anchor=A        # navigate to anchor A
-stretch> elevate_arm height=0.5       # move lift to middle position
-stretch> extend_arm length=0.8        # extend arm 80% of range
-stretch> turn_towards anchor=ORIGIN   # face the center point
-stretch> close_gripper                # grasp object
-```
 
-All movement parameters are normalized to a `0–1` range, where `0.5` is the default/middle position. Supports command history (↑/↓) and tab completion.
+Parameters are normalized to **`0–1`** (`0.5` = mid-range). The CLI supports tab completion and command history.
 
----
+### Core actions
 
-## Action Reference
+| Category | Actions |
+|----------|---------|
+| **Navigation** | `go_to_anchor`, `turn_towards`, `go_to_position` |
+| **Arm** | `reset_arm`, `elevate_arm`, `extend_arm`, `rotate_wrist`, `open_gripper`, `close_gripper`, `set_gripper` |
+| **Utility** | `wait`, `wait_for_arm` |
 
-### Navigation
+Full schema and macro compositions: [config/actions.yaml](config/actions.yaml).
 
-| Action | Parameters | Description |
-|--------|------------|-------------|
-| `go_to_anchor` | `anchor=<A-F\|ORIGIN>` `[speed=0.5]` | Navigate to a named anchor point |
-| `turn_towards` | `anchor=<A-F\|ORIGIN>` `[speed=0.5]` | Rotate to face an anchor |
-| `go_to_position` | `x=<0-1>` `y=<0-1>` `[direction=<0-1>]` `[speed=0.5]` | Navigate to world coordinates |
+### Navigation anchors
 
-### Arm Control
+Waypoints are defined as MuJoCo sites in `models/table_world.xml`:
 
-| Action | Parameters | Description |
-|--------|------------|-------------|
-| `reset_arm` | `[speed=0.5]` | Return arm to default pose |
-| `elevate_arm` | `height=<0-1>` `[speed=0.5]` | Set lift height |
-| `extend_arm` | `length=<0-1>` `[speed=0.5]` | Extend or retract the arm |
-| `rotate_wrist` | `angle=<0-1>` `[speed=0.5]` | Rotate wrist yaw |
-| `open_gripper` | `[speed=0.5]` | Open gripper fully |
-| `close_gripper` | `[speed=0.5]` | Close gripper fully |
-| `set_gripper` | `width=<0-1>` `[speed=0.5]` | Set precise gripper width |
-
-### Utility
-
-| Action | Parameters | Description |
-|--------|------------|-------------|
-| `wait` | `duration=<seconds>` | Pause for a fixed duration |
-| `wait_for_arm` | `[timeout=<seconds>]` | Block until arm reaches target |
-
----
-
-## Anchors
-
-Predefined navigation waypoints in the world coordinate frame:
-
-```
+```text
   A ——— B ——— C
   |           |
   D ——— E ——— F
-        ★ ORIGIN (centroid of all anchors)
+        ★ ORIGIN
 ```
 
 ---
 
 ## ROS 2 Interface
 
-### Subscribed topics
+Simulation node: `scripts/stretch_ros2_sim.py`.
+
+Joint commands use `std_msgs/Float64MultiArray` (lift, arm extension, wrist yaw, gripper, head pan/tilt). The interactive controller publishes on `/stretch/joint_command`; the sim also listens on `/stretch/joint_commands`.
+
+### Subscriptions
 
 | Topic | Type | Description |
 |-------|------|-------------|
-| `/stretch/cmd_vel` | `Twist` | Base velocity commands |
-| `/stretch/joint_commands` | `JointState` | Joint position targets |
-| `/stretch/navigate_to_anchor` | `String` | Anchor navigation goal |
-| `/stretch/turn_towards_anchor` | `String` | Anchor turn goal |
-| `/stretch/navigate_to_position` | `Pose2D` | World-frame navigation goal |
-| `/stretch/reset_arm` | `Empty` | Reset arm command |
+| `/stretch/cmd_vel` | `geometry_msgs/Twist` | Base velocity |
+| `/stretch/joint_command` | `std_msgs/Float64MultiArray` | Joint targets (interactive CLI) |
+| `/stretch/joint_commands` | `std_msgs/Float64MultiArray` | Joint targets (keyboard / external) |
+| `/stretch/navigate_to_anchor` | `std_msgs/String` | Anchor: `A`–`F` or `ORIGIN` |
+| `/stretch/turn_towards_anchor` | `std_msgs/String` | Turn to face anchor |
+| `/stretch/navigate_to_position` | `std_msgs/Float64MultiArray` | `[x, y, direction]` in `0–1` |
+| `/stretch/reset_arm` | `std_msgs/String` | Reset arm pose |
 
-### Published topics
+### Publications
 
 | Topic | Type | Description |
 |-------|------|-------------|
-| `/stretch/joint_states` | `JointState` | Current joint positions |
-| `/stretch/navigation_active` | `Bool` | Navigation status flag |
-| `/stretch/camera/image_raw` | `Image` | Live camera feed |
+| `/stretch/joint_states` | `sensor_msgs/JointState` | Current joint state |
+| `/stretch/navigation_active` | `std_msgs/Bool` | `true` while navigating |
+| `/stretch/camera/image_raw` | `sensor_msgs/Image` | Onboard camera (BGR8) |
 
 ---
 
-## Design Principles
+## Design Notes
 
-**Normalized parameters** — all movement values use a `0–1` range (`0` = minimum, `0.5` = default, `1` = maximum), making action spaces consistent and RL-friendly.
-
-**Action composition** — macro actions are sequences of micro actions defined in `actions.yaml`. This enables high-level commands (including those issued via speech recognition) to be built from small, reusable primitives.
-
-**Speed control** — every movement action accepts an optional `speed` parameter for fine-grained control over execution time.
-
-**State synchronization** — joint states are continuously published to ROS 2 topics, keeping the simulation and any external subscribers in sync.
+- **Normalized action space** — Consistent `0–1` ranges across navigation and manipulation simplify RL training and sim-to-real mapping.
+- **Composable actions** — Micro actions in YAML compose into macros for high-level tasks (including voice-triggered sequences in the full demo stack).
+- **Optional speed** — Movement actions accept a `speed` parameter for timing control.
+- **Closed-loop state** — Joint states stream on ROS 2 for monitors, loggers, and external planners.
 
 ---
 
-## Project Structure
+## Repository Layout
 
-```
+```text
 Stretch3_Simulation/
-├── stretch.xml                      # Robot model (MuJoCo MJCF)
-├── table_world.xml                  # Kitchen world with objects
-├── actions.yaml                     # Micro and macro action definitions
-├── stretch_ros2_sim.py              # Main simulation + ROS 2 node
-├── interactive_controller.py        # CLI controller with tab completion
-├── stretch_keyboard_controller.py   # Keyboard-driven controller
-├── navigation.py                    # Anchor-based navigation logic
-├── ik.py                            # Inverse kinematics solver
-└── assets/                          # 3D models and textures
+├── config/actions.yaml          # Micro & macro action definitions
+├── models/                      # MuJoCo scene (stretch.xml, table_world.xml)
+├── src/stretch_sim/             # Library: navigation, IK, anchors, paths
+├── scripts/                     # Sim node, CLI, keyboard teleop, verify
+├── environment/                 # Conda specs (simenv_ros2, simenv)
+├── docs/                        # Setup & usage guides
+├── tests/                       # ROS 2 communication tests
+├── bin/                         # Shell launchers
+├── assets/                      # Robot meshes
+├── meshes/                      # Objects & convex collision meshes
+└── textures/
 ```
 
 ---
 
-## Documentation
+## Documentation & Links
 
-- [SETUP.md](SETUP.md) — detailed environment setup instructions
-- [USAGE.md](USAGE.md) — complete usage guide with examples
-- [actions.yaml](actions.yaml) — full action schema and examples
-
----
-
-## Resources
-
-- [Hello Robot — Stretch 3 docs](https://docs.hello-robot.com/)
-- [MuJoCo documentation](https://mujoco.readthedocs.io/)
-- [ROS 2 Jazzy documentation](https://docs.ros.org/)
-- [Macro MARL PPO model](https://github.com/wwlin1198/macro_marl_ppo)
+| Resource | |
+|----------|---|
+| [Setup guide](docs/SETUP.md) | Environment and ROS 2 installation |
+| [Usage guide](docs/USAGE.md) | Controllers, navigation, arm control |
+| [Action definitions](config/actions.yaml) | Parameters and macro examples |
+| [Hello Robot Stretch 3](https://docs.hello-robot.com/) | Hardware documentation |
+| [MuJoCo](https://mujoco.readthedocs.io/) | Physics engine |
+| [ROS 2 Jazzy](https://docs.ros.org/en/jazzy/) | Middleware |
