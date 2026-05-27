@@ -22,7 +22,7 @@ The robot uses lidar for autonomous navigation and a camera for object detection
 | Demo | Description |
 |------|-------------|
 | [![pick and place demo](https://img.youtube.com/vi/GQZBjWnBhXU/mqdefault.jpg)](https://youtu.be/GQZBjWnBhXU) | **Single pick and place** — navigates to a table, detects an object, picks and places it |
-| [![pick and place long demo + speech recognition](https://img.youtube.com/vi/5GTzTurSQr8/mqdefault.jpg)](https://youtu.be/5GTzTurSQr8) | **Multi-object + speech recognition** — full pipeline with voice-commanded macro actions |
+| [![pick and place long demo + speech recognition](https://img.youtube.com/vi/lpIhNOAiv7I/mqdefault.jpg)](https://youtu.be/lpIhNOAiv7I) | **Multi-object + speech recognition** — full pipeline with voice-commanded macro actions |
 
 > **Sim-to-real deployment** — source code and documentation for real-world transfer:  
 > → [Stretch3-Deployment](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
