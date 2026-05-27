@@ -1,4 +1,12 @@
 
+
+<br/>
+
+<img width="817" height="344" alt="screenshot" src="https://github.com/user-attachments/assets/9905f37f-c366-4ca3-a26a-03f7a0d1d47a" />
+<br/>
+
+
+
 # Stretch 3 · Simulation Environment
 
 **MuJoCo-based simulation for the Hello Robot Stretch 3 platform**  
