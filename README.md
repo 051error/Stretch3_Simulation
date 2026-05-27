@@ -12,6 +12,11 @@ A MuJoCo-based simulation environment for the **Hello Robot Stretch 2** platform
 In this demo video, the robot uses lidar for navigation and camera to detect the object, then uses IK solver to pick the object.
 [![pick and place demo](https://img.youtube.com/vi/GQZBjWnBhXU/maxresdefault.jpg)](https://youtu.be/GQZBjWnBhXU)
 
+[![pick and place long demo + speech recognition](https://img.youtube.com/vi/5GTzTurSQr8/maxresdefault.jpg)](https://youtu.be/5GTzTurSQr8)
+
+
+https://youtu.be/5GTzTurSQr8
+
 The repo in the link below containes the sourcode and documentation for sim-to-real depoyment of this project.
 [Sim-to-Real_Link](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
 
