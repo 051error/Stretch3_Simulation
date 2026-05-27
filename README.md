@@ -1,8 +1,5 @@
 
 
-[![Watch the demo](./assets/demo-thumbnail.png)](https://github-production-user-asset-6210df.s3.amazonaws.com/10923392/599021006-9905f37f-c366-4ca3-a26a-03f7a0d1d47a.mp4)
-
-
 # Stretch 3 · Simulation Environment
 
 **MuJoCo-based simulation for the Hello Robot Stretch 3 platform**  
@@ -10,8 +7,16 @@ with full ROS 2 integration, autonomous navigation, and sim-to-real transfer
 
 <br/>
 
+<img width="1146" height="720" alt="Screencast from 2026-05-27 15-40-12 (online-video-cutter com) (2)" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
+
+<br/>
+
+<br/>
+
+
 <img width="817" height="344" alt="screenshot" src="https://github.com/user-attachments/assets/2fd96ebf-b1a9-40e4-9745-c2c348ec10df" />
 <br/>
+
 
 </div>
 
