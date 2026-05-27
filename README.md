@@ -15,8 +15,6 @@ In this demo video, the robot uses lidar for navigation and camera to detect the
 [![pick and place long demo + speech recognition](https://img.youtube.com/vi/5GTzTurSQr8/maxresdefault.jpg)](https://youtu.be/5GTzTurSQr8)
 
 
-https://youtu.be/5GTzTurSQr8
-
 The repo in the link below containes the sourcode and documentation for sim-to-real depoyment of this project.
 [Sim-to-Real_Link](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
 
