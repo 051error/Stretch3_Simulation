@@ -1,10 +1,6 @@
 
 
-<br/>
-
-<img width="817" height="344" alt="screenshot" src="https://github.com/user-attachments/assets/9905f37f-c366-4ca3-a26a-03f7a0d1d47a" />
-<br/>
-
+[![Watch the demo](./assets/demo-thumbnail.png)](https://github-production-user-asset-6210df.s3.amazonaws.com/10923392/599021006-9905f37f-c366-4ca3-a26a-03f7a0d1d47a.mp4)
 
 
 # Stretch 3 · Simulation Environment
