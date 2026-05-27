@@ -7,7 +7,7 @@ with full ROS 2 integration, autonomous navigation, and sim-to-real transfer
 
 <br/>
 
-<img width="1146" height="720" alt="Screencast from 2026-05-27 15-40-12 (online-video-cutter com) (2)" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
+<img width="817" alt="Screencast from 2026-05-27 15-40-12 (online-video-cutter com) (2)" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
 
 <br/>
 
