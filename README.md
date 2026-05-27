@@ -5,15 +5,8 @@
 **MuJoCo-based simulation for the Hello Robot Stretch 3 platform**  
 with full ROS 2 integration, autonomous navigation, and sim-to-real transfer
 
-<br/>
-
-<img width="817" alt="Screencast from 2026-05-27 15-40-12 (online-video-cutter com) (2)" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
 
 <br/>
-
-<br/>
-
-
 <img width="817" height="344" alt="screenshot" src="https://github.com/user-attachments/assets/2fd96ebf-b1a9-40e4-9745-c2c348ec10df" />
 <br/>
 
@@ -34,7 +27,9 @@ The robot uses lidar for autonomous navigation and a camera for object detection
 > **Sim-to-real deployment** — source code and documentation for real-world transfer:  
 > → [Stretch3-Deployment](https://github.com/egeozgul/Stretch3-Sim-to-Real/tree/main)
 
-![RViz SLAM localization](https://github.com/egeozgul/Stretch3-Sim-to-Real/blob/main/Navigation/rviz_lidar.png?raw=true)
+<br/>
+<img width="817" alt="Screencast from 2026-05-27 15-40-12 (online-video-cutter com) (2)" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
+<br/>
 *RViz visualization — map, lidar scan, and robot pose during SLAM localization*
 
 ---
