@@ -30,17 +30,13 @@ MuJoCo-based simulation stack for the [Hello Robot Stretch 3](https://hello-robo
 | **Action system** | YAML-defined micro/macro actions (`config/actions.yaml`) |
 | **Interfaces** | Interactive CLI, keyboard teleop, and programmatic ROS 2 clients |
 
-**End-to-end demos** (navigation, perception, speech, SLAM in RViz) use this simulator together with external ROS 2 nodes and the deployment stack linked below—not all of that logic lives in this repo alone.
-
-<p align="center">
-  <img width="800" alt="RViz — map, lidar, and robot pose during localization" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
-  <br />
-  <em>Full-system demo: SLAM and localization run on the physical robot / ROS stack; this repo supplies the sim and control interface.</em>
-</p>
+**End-to-end demos** (navigation, perception, speech, SLAM in RViz) use this simulator together with external ROS 2 nodes and the deployment stack linked below — not all of that logic lives in this repo alone.
 
 ---
 
-## Demos
+## Deployment
+
+Demo videos and sim-to-real transfer results:
 
 | Demo | Description |
 |------|-------------|
@@ -48,6 +44,12 @@ MuJoCo-based simulation stack for the [Hello Robot Stretch 3](https://hello-robo
 | [![Multi-object with speech recognition](https://img.youtube.com/vi/lpIhNOAiv7I/mqdefault.jpg)](https://youtu.be/lpIhNOAiv7I) | **Multi-object + speech recognition** — full pipeline with voice-commanded macro actions |
 
 > **Sim-to-real** — deployment on a physical Stretch 3: [Stretch3-Sim-to-Real](https://github.com/egeozgul/Stretch3-Sim-to-Real)
+
+<p align="center">
+  <img width="800" alt="RViz — map, lidar, and robot pose during localization" src="https://github.com/user-attachments/assets/2ba7d462-146d-4569-8743-0450cbc8b3f1" />
+  <br />
+  <em>Full-system demo: SLAM and localization run on the physical robot / ROS stack; this repo supplies the sim and control interface.</em>
+</p>
 
 ---
 
@@ -87,8 +89,8 @@ conda env create -f environment/environment_ros2.yml
 conda activate simenv_ros2
 source /opt/ros/jazzy/setup.bash
 
-pip install -e .
-make smoke    # quick automated checks (recommended)
+make install  # pip install -e .
+make smoke    # quick automated checks (no ROS required)
 make verify   # full environment check
 ```
 
@@ -110,6 +112,8 @@ conda activate simenv_ros2 && source /opt/ros/jazzy/setup.bash
 make controller
 ```
 
+`make sim`, `make controller`, and `make test` will exit with a clear message if ROS 2 is not sourced first.
+
 | Command | Purpose |
 |---------|---------|
 | `make install` | `pip install -e .` (editable package + CLI tools) |
@@ -118,10 +122,9 @@ make controller
 | `make sim` | MuJoCo + ROS 2 simulation node |
 | `make controller` | Interactive CLI |
 | `make view` | MuJoCo viewer (world only) |
-| `make test` | ROS 2 topic / publisher smoke test |
-| `make help` | List all Makefile targets |
-| `stretch-sim` / `stretch-controller` / `stretch-verify` | CLI aliases (after `pip install -e .`) |
-| `./bin/start_ros2_sim.sh` | One-shot launcher with conda + ROS |
+| `make test` | ROS 2 communication test |
+
+CLI aliases available after `make install`: `stretch-sim`, `stretch-controller`, `stretch-verify`.
 
 See [docs/SETUP.md](docs/SETUP.md) and [docs/USAGE.md](docs/USAGE.md) for troubleshooting and examples.
 
