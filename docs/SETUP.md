@@ -30,18 +30,20 @@ conda activate simenv_ros2
 source /opt/ros/jazzy/setup.bash
 ```
 
-### 3. Verify Setup
+### 3. Install Package and Verify
 
 ```bash
 pip install -e .
-make verify
+make smoke     # quick automated checks (recommended)
+make verify    # full environment verification
 ```
 
-This checks:
+`make smoke` checks Python syntax, repo paths, MuJoCo model loading, `actions.yaml`, and (if ROS is sourced) ROS 2 imports.
+
+`make verify` additionally checks:
 - Conda environment activation
-- Required Python packages
+- Required Python packages (including Python 3.12)
 - Required files and directories
-- MuJoCo model loading
 
 ## ROS 2 Setup
 

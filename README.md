@@ -88,7 +88,8 @@ conda activate simenv_ros2
 source /opt/ros/jazzy/setup.bash
 
 pip install -e .
-make verify
+make smoke    # quick automated checks (recommended)
+make verify   # full environment check
 ```
 
 For MuJoCo only (no ROS 2): `conda env create -f environment/environment.yml` → env name `simenv`.
@@ -111,11 +112,15 @@ make controller
 
 | Command | Purpose |
 |---------|---------|
+| `make install` | `pip install -e .` (editable package + CLI tools) |
+| `make smoke` | Quick automated tests (paths, MuJoCo model, ROS imports) |
+| `make verify` | Full setup verification |
 | `make sim` | MuJoCo + ROS 2 simulation node |
 | `make controller` | Interactive CLI |
 | `make view` | MuJoCo viewer (world only) |
-| `make test` | ROS 2 communication smoke test |
-| `stretch-sim` / `stretch-controller` | Same as above (after `pip install -e .`) |
+| `make test` | ROS 2 topic / publisher smoke test |
+| `make help` | List all Makefile targets |
+| `stretch-sim` / `stretch-controller` / `stretch-verify` | CLI aliases (after `pip install -e .`) |
 | `./bin/start_ros2_sim.sh` | One-shot launcher with conda + ROS |
 
 See [docs/SETUP.md](docs/SETUP.md) and [docs/USAGE.md](docs/USAGE.md) for troubleshooting and examples.
@@ -199,10 +204,12 @@ Joint commands use `std_msgs/Float64MultiArray` (lift, arm extension, wrist yaw,
 
 ```text
 Stretch3_Simulation/
+├── Makefile                     # make smoke, verify, sim, controller, …
+├── pyproject.toml               # pip install -e . + CLI entry points
 ├── config/actions.yaml          # Micro & macro action definitions
 ├── models/                      # MuJoCo scene (stretch.xml, table_world.xml)
 ├── src/stretch_sim/             # Library: navigation, IK, anchors, paths
-├── scripts/                     # Sim node, CLI, keyboard teleop, verify
+├── scripts/                     # Sim node, CLI, smoke_test.py, verify
 ├── environment/                 # Conda specs (simenv_ros2, simenv)
 ├── docs/                        # Setup & usage guides
 ├── tests/                       # ROS 2 communication tests
