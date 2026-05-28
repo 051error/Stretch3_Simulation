@@ -13,6 +13,17 @@ if _src.is_dir() and str(_src) not in sys.path:
 from stretch_sim.paths import get_path, get_xml_path
 
 
+def check_python_version():
+    """ROS 2 Jazzy requires Python 3.12."""
+    major, minor = sys.version_info[:2]
+    if (major, minor) >= (3, 12):
+        print(f"✓ Python {major}.{minor}")
+        return True
+    print(f"✗ Python {major}.{minor} (ROS 2 Jazzy needs 3.12+)")
+    print("  Upgrade: conda install python=3.12  OR  use environment/environment_ros2.yml")
+    return False
+
+
 def check_conda_env():
     """Check if conda environment is activated."""
     import os
@@ -93,19 +104,23 @@ def main():
 
     results = []
 
-    print("1. Checking conda environment...")
+    print("1. Checking Python version...")
+    results.append(check_python_version())
+    print()
+
+    print("2. Checking conda environment...")
     results.append(check_conda_env())
     print()
 
-    print("2. Checking Python packages...")
+    print("3. Checking Python packages...")
     results.append(check_imports())
     print()
 
-    print("3. Checking required files...")
+    print("4. Checking required files...")
     results.append(check_files())
     print()
 
-    print("4. Checking MuJoCo model loading...")
+    print("5. Checking MuJoCo model loading...")
     results.append(check_model_loading())
     print()
 

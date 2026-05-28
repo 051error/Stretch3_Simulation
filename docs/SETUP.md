@@ -119,6 +119,11 @@ conda env remove -n simenv_ros2
 - Check ROS 2 is sourced: `echo $ROS_DISTRO`
 - List nodes: `ros2 node list`
 
+### `RuntimeError: This member is not been selected` (rclpy)
+- Set Cyclone DDS before running sim or tests:
+  `export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp`
+- The Makefile and `bin/*.sh` scripts set this by default.
+
 ### Python version issues
 - Ensure using Python 3.12
 - Check: `python --version`

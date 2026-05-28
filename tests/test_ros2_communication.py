@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Test script to verify ROS 2 communication with Stretch simulation."""
 
+import os
 import sys
 import time
 import rclpy
@@ -18,7 +19,8 @@ def test_imports():
     
     try:
         import rclpy
-        from geometry_msgs.msg import Twist, JointState
+        from geometry_msgs.msg import Twist
+        from sensor_msgs.msg import JointState
         from std_msgs.msg import Float64MultiArray, String
         print("✓ All ROS 2 imports successful")
         return True
@@ -53,6 +55,7 @@ def test_topics():
         return True
     except Exception as e:
         print(f"✗ Error: {e}")
+        print("  Hint: use Python 3.12, source ROS 2, and avoid mixing conda with system ROS.")
         return False
 
 
@@ -113,7 +116,7 @@ def main():
     print("=" * 60)
     print("\nMake sure ROS 2 is sourced: source /opt/ros/jazzy/setup.bash")
     print("For full testing, run the simulation node first:")
-    print("  python stretch_ros2_sim.py")
+    print("  python scripts/stretch_ros2_sim.py")
     print("=" * 60 + "\n")
     
     if not test_imports():
@@ -122,19 +125,22 @@ def main():
     if not test_topics():
         sys.exit(1)
     
-    print("\n" + "=" * 60)
-    if input("Send test commands? (y/n): ").strip().lower() == 'y':
+    send = os.environ.get("STRETCH_SEND_TEST_CMDS", "").lower() in ("1", "y", "yes")
+    if send:
+        print("\n" + "=" * 60)
         if not send_test_commands():
             sys.exit(1)
-    
+    else:
+        print("\n(Set STRETCH_SEND_TEST_CMDS=1 to publish sample commands.)")
+
     print("\n" + "=" * 60)
     print("Test Summary")
     print("=" * 60)
     print("✓ ROS 2 imports: OK")
     print("✓ Topic creation: OK")
     print("\nNext steps:")
-    print("1. Start simulation: python stretch_ros2_sim.py")
-    print("2. Run controller: python stretch_keyboard_controller.py")
+    print("1. Start simulation: make sim")
+    print("2. Run controller: make controller")
     print("=" * 60 + "\n")
 
 
