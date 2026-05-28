@@ -44,3 +44,6 @@ test: test-ros
 test-ros:
 	@test -n "$$ROS_DISTRO" || (echo "Source ROS 2 first: source /opt/ros/jazzy/setup.bash" && exit 1)
 	$(PYTHON) tests/test_ros2_communication.py
+install:
+	@test -n "$$CONDA_DEFAULT_ENV" || echo "Warning: no conda env active — consider activating simenv_ros2 first"
+	pip install -e .
