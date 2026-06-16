@@ -63,6 +63,9 @@
     <site name="anchor_D" pos="0.65 3.6 0.00" size="0.075" rgba="1 0 0 0.5" type="sphere"/>
     <!-- anchor_D direction="180" -->
 
+    <site name="anchor_G" pos="0.5 3.75 0.00" size="0.075" rgba="0 1 1 0.5" type="sphere"/>
+    <!-- anchor_G direction="180" — pre-pick waypoint ~25 cm in front of table 2 for RL arm control -->
+
     <site name="anchor_E" pos="1.6 2.9 0.00" size="0.075" rgba="0 0 1 0.5" type="sphere"/>
     <!-- anchor_E direction="90" -->
     

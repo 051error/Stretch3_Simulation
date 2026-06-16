@@ -15,11 +15,11 @@
       </default>
       <default class="lift">
         <joint type="slide" axis="0 0 1" damping="5" range="-0.5 .6"/>
-        <general ctrlrange="-0.5 .6" gainprm="300" biasprm="0 -300 -50" forcerange="-56 56"/>
+        <general ctrlrange="-0.5 .6" gainprm="1000" biasprm="0 -1000 -50" forcerange="-250 250"/>
       </default>
       <default class="telescope">
         <joint type="slide" axis="0 0 1" damping="5" range="0 0.13"/>
-        <general ctrlrange="0 0.52" gainprm="100" biasprm="0 -100 -10" forcerange="-56 56"/>
+        <general ctrlrange="0 0.52" gainprm="500" biasprm="0 -500 -10" forcerange="-250 250"/>
       </default>
       <default class="head">
         <joint axis="0 0 1" damping="1"/>
@@ -35,7 +35,7 @@
       </default>
       <default class="wrist">
         <joint axis="0 0 -1" range="-1.75 4" damping=".1"/>
-        <general gainprm="1" biasprm="0 -1 0" ctrlrange="-1.75 4" forcerange="-5 5"/>
+        <general gainprm="10" biasprm="0 -10 0" ctrlrange="-1.75 4" forcerange="-20 20"/>
       </default>
       <default class="finger_open">
         <joint axis="0 0 1" range="-0.6 0.6" damping=".1"/>
@@ -294,6 +294,7 @@
                     <body name="link_gripper_slider" quat="0.183013 -0.683017 -0.683009 -0.183013"
                       pos="0 0.047231 0.04679" gravcomp="1">
                       <joint name="joint_gripper_slide" class="finger_slide"/>
+                      <site name="ee_site" pos="0.08 0 0" size="0.01" rgba="1 0 0 1"/>
                       <geom type="box" size=".03 .005 .005" mass=".05" class="visual" rgba="0 0 0 0"/>
                       <body name="link_gripper_finger_left" pos="0 0.0101513 0" gravcomp="1">
                         <joint name="joint_gripper_finger_left_open" class="finger_open"/>

@@ -63,7 +63,7 @@ def main() -> int:
         from stretch_sim.anchor_utils import load_anchors_from_xml
 
         anchors = load_anchors_from_xml()
-        expected = {"A", "B", "C", "D", "E", "F", "ORIGIN"}
+        expected = {"A", "B", "C", "D", "E", "F", "G", "ORIGIN"}
         results.append(run("anchors loaded", set(anchors) == expected, f"{len(anchors)} anchors"))
     except Exception as exc:
         results.append(run("anchors loaded", False, str(exc)))

@@ -102,6 +102,19 @@ micro_actions:
     parameters:
       timeout: "float"  # Maximum wait time in seconds (optional)
 
+  # RL control actions (two-stage)
+  - name: "rl_approach"
+    type: "rl_control"
+    description: "Stage 1 — use PPO to move EE near the object (Usage: rl_approach target=tomato1 max_steps=200)"
+
+  - name: "rl_grasp_lift"
+    type: "rl_control"
+    description: "Stage 2 — use PPO to close gripper and lift the object (Usage: rl_grasp_lift target=tomato1 max_steps=300)"
+
+  - name: "rl_pick_object"
+    type: "rl_control"
+    description: "Single-stage PPO pick (legacy). Use rl_approach + rl_grasp_lift for two-stage."
+
 # ============================================================================
 # MACRO ACTIONS (Complex Behaviors)
 # ============================================================================
@@ -120,80 +133,118 @@ macro_actions:
   - name: "get_tomato"
     description: "Navigate to tomato location and pick it up"
     sequence:
+      # 1. Reset arm to safe position and wait for completion
       - action: "reset_arm"
         parameters:
-          speed: 0.01
+          speed: 0.5
+      - action: "wait_for_arm"
+        parameters:
+          timeout: 10.0
+
+      # 2. Face ORIGIN, then navigate to table 2 right side (tomato location)
       - action: "turn_towards"
         parameters:
           anchor: "ORIGIN"
           speed: 0.5
-      - action: "wait"
-        parameters:
-          duration: 0
       - action: "go_to_anchor"
         parameters:
           anchor: "D"
           speed: 0.9
-      - action: "wait"
-        parameters:
-          duration: 0
+
+      # 3. Face the table (degrees=90 — calibrate if incorrect for your scene)
       - action: "turn_towards"
         parameters:
-          degrees: 270
+          degrees: 90
           speed: 0.5
           delta_angle: 5
-      - action: "rotate_wrist"
-        parameters:
-          angle: 0.33
-          speed: 0.02
-      - action: "wait"
-        parameters:
-          duration: 1.0
-      - action: "extend_arm"
-        parameters:
-          length: 0.4
-          speed: 0.01
-      - action: "wait"
-        parameters:
-          duration: 1.0
+
+      # 4. Open gripper first (safe: arm is still high, wont hit anything)
       - action: "set_gripper"
         parameters:
-          width: 0.9
-          speed: 0.01
+          width: 1.0
+          speed: 0.5
       - action: "wait"
         parameters:
-          duration: 1.0
+          duration: 0.5
+
+      # 5. Extend arm + rotate wrist before descending
+      - action: "extend_arm"
+        parameters:
+          length: 0.6
+          speed: 0.3
+      - action: "rotate_wrist"
+        parameters:
+          angle: 0.5
+          speed: 0.3
+      - action: "wait_for_arm"
+        parameters:
+          timeout: 8.0
+
+      # 6. Descend to pick height (0.45 = lift approx -0.005 m; calibrate to table)
       - action: "elevate_arm"
         parameters:
-          height: 0.56
-          speed: 0.01
-      - action: "wait"
+          height: 0.45
+          speed: 0.2
+      - action: "wait_for_arm"
         parameters:
-          duration: 5.0
+          timeout: 20.0
+
+      # 7. Close gripper to grasp
       - action: "set_gripper"
         parameters:
           width: 0.0
-          speed: 0.01
+          speed: 0.5
       - action: "wait"
         parameters:
-          duration: 1.0
+          duration: 20.0
+
+      # 8. Lift arm
       - action: "elevate_arm"
         parameters:
           height: 0.8
-          speed: 0.01
-      #     anchor: "B"  # Example anchor near tomatoes
-      # - action: "reset_arm"
-      # - action: "elevate_arm"
-      #   parameters:
-      #     height: 0.4
-      # - action: "extend_arm"
-      #   parameters:
-      #     length: 0.3
-      # - action: "close_gripper"
-      - action: "wait"
+          speed: 0.5
+      - action: "wait_for_arm"
         parameters:
-          duration: 0.1
-    
+          timeout: 5.0
+
+  # ── RL-enhanced macro action: navigation same as get_tomato, arm control via PPO ──
+  - name: "rl_get_tomato"
+    description: "Navigate to tomato location and use RL (PPO) to pick it up"
+    sequence:
+      # Phase 1: Navigation (same as get_tomato — no RL)
+      - action: "reset_arm"
+        parameters:
+          speed: 0.5
+      - action: "wait_for_arm"
+        parameters:
+          timeout: 10.0
+
+      - action: "turn_towards"
+        parameters:
+          anchor: "ORIGIN"
+          speed: 0.5
+      - action: "go_to_anchor"
+        parameters:
+          anchor: "G"
+          speed: 0.9
+      - action: "turn_towards"
+        parameters:
+          degrees: 180
+          speed: 0.5
+          delta_angle: 5
+
+      # Phase 2a: RL Stage 1 — approach (move EE near the tomato)
+      - action: "rl_approach"
+        parameters:
+          target: "tomato1"
+          max_steps: 1000
+
+      # Phase 2b: RL Stage 2 — grasp & lift (close gripper, raise arm)
+      - action: "rl_grasp_lift"
+        parameters:
+          target: "tomato1"
+          max_steps: 1000
+
   - name: "get_lettuce"
     description: "Navigate to lettuce location and pick it up"
     sequence:
@@ -326,6 +377,7 @@ constants:
     B: "Table 1, right side"
     C: "Table 2, left side"
     D: "Table 2, right side"
+    G: "Table 2, front — pre-pick waypoint for RL arm control"
     E: "Table 3 area"
     F: "Table 3 area"
   

@@ -117,9 +117,28 @@ class NavigationController:
         Returns:
             (linear_vel, angular_vel) tuple in (m/s, rad/s)
         """
-        if not self.active or self.target_pos is None:
+        if not self.active:
             return (0.0, 0.0)
-        
+
+        # Absolute angle turn-only mode: no target position, only target direction
+        if self.target_pos is None:
+            if self._turn_only_start_time is not None and self.target_direction is not None:
+                current_yaw = self._quaternion_to_yaw(current_quat)
+                desired_angle = self.target_direction
+                angle_error = self._calculate_angle_error(desired_angle, current_yaw)
+                angle_error_abs = abs(angle_error)
+
+                angular_vel = np.clip(-K_P_ANGULAR * angle_error, -MAX_ANGULAR_VEL, MAX_ANGULAR_VEL)
+
+                if angle_error_abs <= self.turn_only_tolerance:
+                    time_elapsed = time.time() - self._turn_only_start_time
+                    if time_elapsed >= 0.5 and abs(angular_vel) < 0.2:
+                        self.reached = True
+                        self.active = False
+                        return (0.0, 0.0)
+                return (0.0, angular_vel)
+            return (0.0, 0.0)
+
         diff = self.target_pos - np.array(current_pos[:2])
         distance = np.linalg.norm(diff)
         current_yaw = self._quaternion_to_yaw(current_quat)
@@ -134,6 +153,7 @@ class NavigationController:
         
         # Phase 1: Navigate to position
         if not self._position_reached:
+            # Turn toward target
             desired_angle = math.atan2(diff[1], diff[0])
             angle_error = self._calculate_angle_error(desired_angle, current_yaw)
             angle_error_abs = abs(angle_error)

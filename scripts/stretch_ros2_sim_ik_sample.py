@@ -33,9 +33,10 @@ JOINT_NAMES = [
     'joint_wrist_yaw', 'joint_head_pan', 'joint_head_tilt'
 ]
 
+# qpos indices must match the MuJoCo model jnt_qposadr values
 JOINT_QPOS_MAP = {
-    'joint_lift': 7, 'joint_arm_l0': 8, 'joint_arm_l1': 9,
-    'joint_arm_l2': 10, 'joint_arm_l3': 11
+    'joint_lift': 9, 'joint_arm_l3': 10, 'joint_arm_l2': 11,
+    'joint_arm_l1': 12, 'joint_arm_l0': 13
 }
 
 JOINT_LIMITS = {

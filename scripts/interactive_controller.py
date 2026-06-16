@@ -18,6 +18,7 @@ from stretch_sim.navigation import NavigationController
 from stretch_sim.paths import get_config_path
 import time
 import threading
+import subprocess
 
 try:
     import yaml
@@ -39,8 +40,8 @@ class InteractiveController(Node):
     
     # Constants
     DEFAULT_SPEED = 50.0
-    NAV_TIMEOUT = 30.0
-    ARM_TIMEOUT = 10.0
+    NAV_TIMEOUT = 120.0 
+    ARM_TIMEOUT = 120.0
     POSITION_TOLERANCE = 0.05
     CHECK_INTERVAL = 0.1
     
@@ -574,6 +575,68 @@ class InteractiveController(Node):
         'wait': '_handle_wait',
         'wait_for_arm': '_handle_wait_for_arm',
     }
+
+    RL_HANDLERS = {
+        'rl_approach': '_handle_rl_approach',
+        'rl_grasp_lift': '_handle_rl_grasp_lift',
+        'rl_pick_object': '_handle_rl_pick_object',
+    }
+
+    def _run_rl_stage(self, stage: str, params: dict) -> bool:
+        """Shared helper: run an RL inference stage via subprocess."""
+        target = params.get('target', 'tomato1')
+        max_steps = int(params.get('max_steps', 200))
+
+        repo_root = Path(__file__).resolve().parents[1]
+
+        # Try ppo_<stage>_<target>.zip first, then sac_<stage>_<target>.zip
+        model_path = None
+        for algo_prefix in ["ppo", "sac"]:
+            candidate = repo_root / "models" / f"{algo_prefix}_{stage}_{target}.zip"
+            if candidate.exists():
+                model_path = candidate
+                break
+
+        if model_path is None:
+            print(f"  ✗ No trained model found for stage '{stage}' target '{target}'")
+            print(f"    Train: python scripts/train_rl_arm.py --algo ppo|sac "
+                  f"--stage {stage} --target {target}")
+            return False
+
+        script = repo_root / "scripts" / "rl_inference_arm.py"
+        print(f"→ RL {stage}: {target} (max {max_steps} steps, model: {model_path.name})...")
+
+        try:
+            result = subprocess.run(
+                [sys.executable, str(script),
+                 "--stage", stage, "--target", target,
+                 "--max-steps", str(max_steps),
+                 "--model", str(model_path), "--step-delay", "0.05"],
+                capture_output=False,
+                timeout=max_steps * 0.1 + 30,
+            )
+            if result.returncode == 0:
+                print(f"  ✓ RL {stage} completed")
+                return True
+            else:
+                print(f"  ✗ RL {stage} failed (exit {result.returncode})")
+                return False
+        except subprocess.TimeoutExpired:
+            print(f"  ✗ RL {stage} timed out")
+            return False
+        except Exception as e:
+            print(f"  ✗ RL {stage} error: {e}")
+            return False
+
+    def _handle_rl_approach(self, params):
+        return self._run_rl_stage("approach", params)
+
+    def _handle_rl_grasp_lift(self, params):
+        return self._run_rl_stage("grasp", params)
+
+    def _handle_rl_pick_object(self, params):
+        """Legacy single-stage RL pick."""
+        return self._run_rl_stage("pick", params)
     
     def _execute_micro_action(self, action_name, params):
         """Execute a micro action."""
@@ -590,6 +653,7 @@ class InteractiveController(Node):
                 'navigation': self.NAVIGATION_HANDLERS,
                 'arm_control': self.ARM_HANDLERS,
                 'utility': self.UTILITY_HANDLERS,
+                'rl_control': self.RL_HANDLERS,
             }
             
             handlers = handler_map.get(action_type, {})
@@ -718,11 +782,22 @@ class InteractiveController(Node):
         speed_str = f", speed={speed_percent:.0f}%" if speed_percent != self.DEFAULT_SPEED else ""
         print(f"→ Navigating to position ({x:.2f}, {y:.2f}{direction_str}{speed_str})")
     
+    # Must match RESET_POSITIONS in stretch_ros2_sim.py
+    _RESET_TARGETS = {
+        'lift': 0.6,
+        'arm_extend': 0.0,
+        'wrist_yaw': 1.125,   # (4.0 + -1.75) / 2
+        'gripper': 0.04,
+    }
+
     def _reset_arm(self, speed_percent=DEFAULT_SPEED):
         """Reset arm to default position with speed percentage."""
         msg = String()
         msg.data = f'reset:{speed_percent}'
         self.reset_pub.publish(msg)
+        # Sync local joint state so wait_for_arm doesn't time out due to stale targets
+        for key, value in self._RESET_TARGETS.items():
+            self.joint_state[key] = value
         print(f"→ Resetting arm to default position{self._format_speed_str(speed_percent)}")
     
     def _elevate_arm(self, height, speed_percent=DEFAULT_SPEED):
@@ -757,35 +832,59 @@ class InteractiveController(Node):
     def _wait_for_arm(self, timeout=ARM_TIMEOUT):
         """Wait until arm reaches target positions."""
         print(f"→ Waiting for arm to reach target positions (timeout: {timeout}s)...")
-        
+
         targets = {
             'joint_lift': self.joint_state.get('lift'),
             'joint_arm_l0': self.joint_state.get('arm_extend') / 4.0,
             'joint_wrist_yaw': self.joint_state.get('wrist_yaw'),
         }
-        
+
+        # Diagnostic: check if any joint states have been received
+        if not self.current_joint_states:
+            print("  ⚠ No joint states received — is the simulation (make sim) running?")
+            print("  ⚠ Waiting 3 s for ROS connections to establish...")
+            for _ in range(30):
+                rclpy.spin_once(self, timeout_sec=0.1)
+                time.sleep(0.1)
+                if self.current_joint_states:
+                    break
+
         start_time = time.time()
-        
+
         while time.time() - start_time < timeout:
             all_reached = True
-            
+
             for joint_name, target in targets.items():
                 if target is None:
                     continue
-                
+
                 current = self.current_joint_states.get(joint_name)
-                if current is None or abs(current - target) > self.POSITION_TOLERANCE:
+                if current is None:
                     all_reached = False
                     break
-            
+                if abs(current - target) > self.POSITION_TOLERANCE:
+                    all_reached = False
+                    break
+
             if all_reached:
                 print("  ✓ Arm reached target positions")
                 return True
-            
+
             rclpy.spin_once(self, timeout_sec=self.CHECK_INTERVAL)
             time.sleep(self.CHECK_INTERVAL)
-        
-        print(f"  ⚠ Timeout reached ({timeout}s)")
+
+        # Timeout diagnostic
+        if not self.current_joint_states:
+            print("  ✗ Timed out — no joint states were ever received.")
+            print("    Make sure the simulation (make sim) is running in another terminal.")
+        else:
+            print(f"  ✗ Timed out — joint states received but arm not at target:", end="")
+            for jn, t in targets.items():
+                cur = self.current_joint_states.get(jn, "???")
+                if t is not None:
+                    err = abs(cur - t) if isinstance(cur, (int, float)) else 999
+                    print(f" {jn}={cur:.3f}(target:{t:.3f} err:{err:.3f})", end="")
+            print()
         return False
     
     def run(self):

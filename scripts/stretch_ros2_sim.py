@@ -31,9 +31,10 @@ JOINT_NAMES = [
     'joint_wrist_yaw', 'joint_head_pan', 'joint_head_tilt'
 ]
 
+# qpos indices must match the MuJoCo model jnt_qposadr values
 JOINT_QPOS_MAP = {
-    'joint_lift': 7, 'joint_arm_l0': 8, 'joint_arm_l1': 9,
-    'joint_arm_l2': 10, 'joint_arm_l3': 11
+    'joint_lift': 9, 'joint_arm_l3': 10, 'joint_arm_l2': 11,
+    'joint_arm_l1': 12, 'joint_arm_l0': 13
 }
 
 JOINT_LIMITS = {
@@ -475,7 +476,7 @@ class StretchSimNode(Node):
             f'err={angle_error_deg:.1f}°, aligned={aligned}'
         )
     
-    def _update_navigation(self):
+    def _update_navigation(self):  
         """Update navigation controller and apply its commands."""
         nav_status = Bool()
         nav_status.data = self.nav_controller.is_active() and not self.manual_control
