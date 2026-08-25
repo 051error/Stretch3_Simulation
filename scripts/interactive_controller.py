@@ -576,11 +576,57 @@ class InteractiveController(Node):
         'wait_for_arm': '_handle_wait_for_arm',
     }
 
+    CONTROL_HANDLERS = {
+        'pid_pick': '_handle_pid_pick',
+        'mpc_pick': '_handle_mpc_pick',
+    }
+
     RL_HANDLERS = {
         'rl_approach': '_handle_rl_approach',
         'rl_grasp_lift': '_handle_rl_grasp_lift',
         'rl_pick_object': '_handle_rl_pick_object',
     }
+
+    def _run_control_script(self, script_name: str, params: dict) -> bool:
+        """Shared helper: run a control script (PID/MPC) via subprocess."""
+        target = params.get('target', 'tomato1')
+        max_steps = int(params.get('max_steps', 600))
+
+        repo_root = Path(__file__).resolve().parents[1]
+        script = repo_root / "scripts" / script_name
+
+        if not script.exists():
+            print(f"  ✗ Script not found: {script}")
+            return False
+
+        print(f"→ {script_name}: {target} (max {max_steps} steps)...")
+
+        try:
+            result = subprocess.run(
+                [sys.executable, str(script),
+                 "--max-steps", str(max_steps)],
+                capture_output=False,
+                timeout=max_steps * 0.1 + 60,
+            )
+            name = script_name.replace(".py", "")
+            if result.returncode == 0:
+                print(f"  ✓ {name} completed")
+                return True
+            else:
+                print(f"  ✗ {name} failed (exit {result.returncode})")
+                return False
+        except subprocess.TimeoutExpired:
+            print(f"  ✗ {script_name} timed out")
+            return False
+        except Exception as e:
+            print(f"  ✗ {script_name} error: {e}")
+            return False
+
+    def _handle_pid_pick(self, params):
+        return self._run_control_script("pid_arm_control.py", params)
+
+    def _handle_mpc_pick(self, params):
+        return self._run_control_script("mpc_arm_control.py", params)
 
     def _run_rl_stage(self, stage: str, params: dict) -> bool:
         """Shared helper: run an RL inference stage via subprocess."""
@@ -654,6 +700,7 @@ class InteractiveController(Node):
                 'arm_control': self.ARM_HANDLERS,
                 'utility': self.UTILITY_HANDLERS,
                 'rl_control': self.RL_HANDLERS,
+                'control': self.CONTROL_HANDLERS,
             }
             
             handlers = handler_map.get(action_type, {})

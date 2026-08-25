@@ -102,6 +102,15 @@ micro_actions:
     parameters:
       timeout: "float"  # Maximum wait time in seconds (optional)
 
+  # Classical & optimal control actions
+  - name: "pid_pick"
+    type: "control"
+    description: "Use position PID controllers to pick up an object (Usage: pid_pick target=tomato1 max_steps=600)"
+
+  - name: "mpc_pick"
+    type: "control"
+    description: "Use random-shooting MPC to pick up an object (Usage: mpc_pick target=tomato1 max_steps=600)"
+
   # RL control actions (two-stage)
   - name: "rl_approach"
     type: "rl_control"
@@ -244,6 +253,65 @@ macro_actions:
         parameters:
           target: "tomato1"
           max_steps: 1000
+
+  # ── PID-based macro: 5-stage pick (nav → descend → extend → grasp → lift) ──
+  - name: "PID_get_tomato"
+    description: "Navigate + PID pick: (1) nav to anchor, (2) descend, (3) extend, (4) grasp, (5) lift"
+    sequence:
+      # Stage 1 — Navigate to pre-pick waypoint
+      - action: "reset_arm"
+        parameters:
+          speed: 0.5
+      - action: "wait_for_arm"
+        parameters:
+          timeout: 10.0
+      - action: "turn_towards"
+        parameters:
+          anchor: "ORIGIN"
+          speed: 0.5
+      - action: "go_to_anchor"
+        parameters:
+          anchor: "G"
+          speed: 0.9
+      - action: "turn_towards"
+        parameters:
+          degrees: 180
+          speed: 0.5
+          delta_angle: 5
+
+      # Stages 2-5 — PID arm control: descend → extend → grasp → lift
+      - action: "pid_pick"
+        parameters:
+          target: "tomato1"
+          max_steps: 800
+
+  # ── MPC-based macro: navigation = same, arm control via shooting MPC ──
+  - name: "MPC_get_tomato"
+    description: "Navigate to tomato and pick it using MPC (model predictive control)"
+    sequence:
+      - action: "reset_arm"
+        parameters:
+          speed: 0.5
+      - action: "wait_for_arm"
+        parameters:
+          timeout: 10.0
+      - action: "turn_towards"
+        parameters:
+          anchor: "ORIGIN"
+          speed: 0.5
+      - action: "go_to_anchor"
+        parameters:
+          anchor: "G"
+          speed: 0.9
+      - action: "turn_towards"
+        parameters:
+          degrees: 180
+          speed: 0.5
+          delta_angle: 5
+      - action: "mpc_pick"
+        parameters:
+          target: "tomato1"
+          max_steps: 600
 
   - name: "get_lettuce"
     description: "Navigate to lettuce location and pick it up"
