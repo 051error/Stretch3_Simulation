@@ -1,4 +1,4 @@
-.PHONY: help install verify smoke sim controller view test test-ros
+.PHONY: help install verify smoke sim nav2 controller view test test-ros
 
 ROOT := $(shell pwd)
 export PYTHONPATH := $(ROOT)/src:$(PYTHONPATH)
@@ -15,11 +15,13 @@ help:
 	@echo "  make verify      Run setup verification"
 	@echo "  make smoke       Quick non-interactive tests (recommended)"
 	@echo "  make sim         Start MuJoCo + ROS 2 simulation"
+	@echo "  make nav2        Start Nav2 navigation stack (run after make sim)"
 	@echo "  make controller  Start interactive CLI controller"
 	@echo "  make view        Open MuJoCo world viewer"
 	@echo "  make test        Run ROS 2 communication tests"
 
 install:
+	@test -n "$$CONDA_DEFAULT_ENV" || echo "Warning: no conda env active — consider activating simenv_ros2 first"
 	pip install -e .
 
 verify:
@@ -31,6 +33,10 @@ smoke:
 sim:
 	@test -n "$$ROS_DISTRO" || (echo "Source ROS 2 first: source /opt/ros/jazzy/setup.bash" && exit 1)
 	$(PYTHON) scripts/stretch_ros2_sim.py
+
+nav2:
+	@test -n "$$ROS_DISTRO" || (echo "Source ROS 2 first: source /opt/ros/jazzy/setup.bash" && exit 1)
+	ros2 launch $(ROOT)/launch/nav2_sim.launch.py
 
 controller:
 	@test -n "$$ROS_DISTRO" || (echo "Source ROS 2 first: source /opt/ros/jazzy/setup.bash" && exit 1)
@@ -44,6 +50,3 @@ test: test-ros
 test-ros:
 	@test -n "$$ROS_DISTRO" || (echo "Source ROS 2 first: source /opt/ros/jazzy/setup.bash" && exit 1)
 	$(PYTHON) tests/test_ros2_communication.py
-install:
-	@test -n "$$CONDA_DEFAULT_ENV" || echo "Warning: no conda env active — consider activating simenv_ros2 first"
-	pip install -e .
