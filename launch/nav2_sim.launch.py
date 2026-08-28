@@ -1,9 +1,12 @@
-"""Launch Nav2 for the Stretch 3 MuJoCo simulation.
+"""Launch Nav2 + RViz for the Stretch 3 MuJoCo simulation.
 
 Spawns the Nav2 navigation stack (controller, planner, smoother, behaviors,
-BT navigator, lifecycle manager) plus a static ``map -> odom`` identity
-transform. There is no AMCL or map_server: the simulator publishes ground-truth
-odometry, and the identity map transform anchors it in the ``map`` frame.
+BT navigator, lifecycle manager), a static ``map -> odom`` identity transform,
+``robot_state_publisher`` (publishes ``/robot_description`` and the
+``base_link -> laser`` transform), and RViz.
+
+There is no AMCL or map_server: the simulator publishes ground-truth odometry,
+and the identity map transform anchors it in the ``map`` frame.
 
 Run after the simulator node is up (``make sim``):
 
@@ -23,6 +26,15 @@ def generate_launch_description():
     params_file = os.path.join(
         os.path.dirname(__file__), '..', 'config', 'nav2_params.yaml'
     )
+    urdf_file = os.path.join(
+        os.path.dirname(__file__), '..', 'models', 'stretch_description.urdf'
+    )
+    rviz_config = os.path.join(
+        os.path.dirname(__file__), '..', 'config', 'nav2_view.rviz'
+    )
+
+    with open(urdf_file, 'r') as f:
+        robot_description = f.read()
 
     map_to_odom = Node(
         package='tf2_ros',
@@ -89,6 +101,22 @@ def generate_launch_description():
         }],
     )
 
+    robot_state_publisher = Node(
+        package='robot_state_publisher',
+        executable='robot_state_publisher',
+        name='robot_state_publisher',
+        output='screen',
+        parameters=[{'robot_description': robot_description}],
+    )
+
+    rviz2 = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
+        arguments=['-d', rviz_config],
+        output='screen',
+    )
+
     return LaunchDescription([
         map_to_odom,
         controller_server,
@@ -97,4 +125,6 @@ def generate_launch_description():
         behavior_server,
         bt_navigator,
         lifecycle_manager,
+        robot_state_publisher,
+        rviz2,
     ])

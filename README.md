@@ -160,9 +160,13 @@ For path planning and obstacle avoidance, the model includes a **2D lidar** (360
 - **global costmap** — rolling 15×15 m window at 0.05 m resolution
 - **local costmap** — rolling 4×4 m window, DWB local planner
 - **global planner** — NavFn
-- **TF tree** — `map → odom` (static identity) `→ base_link` (from odometry) `→ laser` (static)
+- **TF tree** — `map → odom` (static identity) `→ base_link` (from odometry) `→ laser` (from the URDF, via `robot_state_publisher`)
+- **`robot_state_publisher`** — publishes `/robot_description` and the `base_link → laser` transform from [models/stretch_description.urdf](models/stretch_description.urdf)
+- **RViz** — opens [config/nav2_view.rviz](config/nav2_view.rviz) showing the robot model, lidar, costmaps, and plans
 
-There is no AMCL or `map_server`: the simulator publishes ground-truth odometry, and the identity `map → odom` transform anchors it in the global frame. Nav2's `cmd_vel` is remapped to `/stretch/cmd_vel`, which the simulator already subscribes to.
+There is no AMCL or `map_server`: the simulator publishes ground-truth odometry, and the identity `map → odom` transform anchors it in the global frame. Nav2's `cmd_vel` (in m/s and rad/s) is remapped to `/stretch/cmd_vel`, where the simulator converts it to motor commands using the measured base scaling (forward ≈ 0.25 m/s, turn ≈ 0.50 rad/s).
+
+**Set a goal in RViz** — use the **"2D Goal Pose"** tool (`nav2_rviz_plugins/GoalTool`) or the **"Navigation 2"** panel to click a goal pose; the Nav2 stack receives it through the `/navigate_to_pose` action. The same goal can be sent from the command line:
 
 ```bash
 # send a goal to the Nav2 stack
@@ -243,10 +247,10 @@ Simulation node: `scripts/stretch_ros2_sim.py`.
 ### TF tree
 
 ```
-map ──(static identity)──> odom ──(dynamic from qpos)──> base_link
-                                                          ├──> laser (static)
-                                                          └──> camera_rgb (static)
+map ──(static identity)──> odom ──(dynamic from qpos)──> base_link ──(robot_state_publisher)──> laser
 ```
+
+`base_link → laser` is read from the simplified URDF [models/stretch_description.urdf](models/stretch_description.urdf) and broadcast by `robot_state_publisher` (launched with `make nav2`), so the laser frame stays available in RViz and the costmaps without the simulator hard-coding it.
 
 ---
 
@@ -273,9 +277,11 @@ Stretch3_Simulation/
 ├── pyproject.toml               # pip install -e . + CLI entry points
 ├── config/
 │   ├── actions.yaml             # Micro & macro action definitions
-│   └── nav2_params.yaml         # Nav2 controller/planner/costmap parameters
-├── launch/nav2_sim.launch.py    # Nav2 navigation stack
+│   ├── nav2_params.yaml         # Nav2 controller/planner/costmap parameters
+│   └── nav2_view.rviz           # RViz layout (robot model, lidar, costmaps, goal tool)
+├── launch/nav2_sim.launch.py    # Nav2 navigation stack (Nav2 + robot_state_publisher + RViz)
 ├── models/                      # MuJoCo scene + RL checkpoints + TensorBoard logs
+│   └── stretch_description.urdf # Simplified robot model for RViz (robot_state_publisher)
 ├── src/stretch_sim/             # Library: navigation, IK, RL env, anchors, paths
 ├── scripts/                     # Sim node, CLI, PID/MPC/RL controllers, trainers
 ├── tools/                       # Model utilities (gen_laser.py, mesh tools)

@@ -2,7 +2,7 @@
 """Generate 2D lidar rangefinders for the Stretch MuJoCo model.
 
 Regenerates the N ``laser_site_*`` sites and N ``laser_*`` rangefinders that
-make up a 2D lidar sweeping the horizontal plane from -pi to pi at 1-degree
+make up a 2D lidar sweeping the horizontal plane from -pi to pi at 4-degree
 resolution, and inlines them into ``models/stretch.xml`` (also writes standalone
 fragments for reference). The operation is idempotent: any previously generated
 sites/rangefinders are removed first.
@@ -25,7 +25,7 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
-N = 360  # number of rays (1-degree resolution over a full circle)
+N = 90  # number of rays (4-degree resolution over a full circle)
 MODELS_DIR = Path(__file__).resolve().parents[1] / "models"
 
 

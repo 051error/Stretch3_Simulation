@@ -1,7 +1,7 @@
 <mujoco model="throwing_environment">
   <compiler angle="radian" assetdir="." autolimits="true"/>
   
-  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+  <option timestep="0.005" gravity="0 0 -9.81" integrator="implicitfast"/>
   
   <visual>
   <quality shadowsize="0" /> <global offwidth="640" offheight="480" /> </visual>

@@ -16,6 +16,10 @@ venv/
 MUJOCO_LOG.TXT
 MJDATA.TXT
 
+# colcon build artifacts
+install/
+log/
+
 # IDE
 .idea/
 .vscode/

@@ -160,9 +160,13 @@ stretch> rl_get_tomato
 - **全局代价地图** — 15×15 m 滚动窗口，分辨率 0.05 m
 - **局部代价地图** — 4×4 m 滚动窗口，DWB 局部规划器
 - **全局规划器** — NavFn
-- **TF 树** — `map → odom`（静态恒等）`→ base_link`（来自里程计）`→ laser`（静态）
+- **TF 树** — `map → odom`（静态恒等）`→ base_link`（来自里程计）`→ laser`（来自 URDF，经 `robot_state_publisher`）
+- **`robot_state_publisher`** — 发布 `/robot_description` 以及来自 [models/stretch_description.urdf](models/stretch_description.urdf) 的 `base_link → laser` 变换
+- **RViz** — 打开 [config/nav2_view.rviz](config/nav2_view.rviz)，显示机器人模型、激光、代价地图与路径
 
-没有 AMCL 或 `map_server`：仿真器发布真实里程计，恒等 `map → odom` 变换将其锚定在全局坐标系中。Nav2 的 `cmd_vel` 被重映射到 `/stretch/cmd_vel`，仿真器已订阅该话题。
+没有 AMCL 或 `map_server`：仿真器发布真实里程计，恒等 `map → odom` 变换将其锚定在全局坐标系中。Nav2 的 `cmd_vel`（单位 m/s 与 rad/s）被重映射到 `/stretch/cmd_vel`，仿真器再根据实测的底盘标定（前进 ≈ 0.25 m/s，转向 ≈ 0.50 rad/s）将其转换为电机指令。
+
+**在 RViz 中设置目标点** — 使用 **"2D Goal Pose"** 工具（`nav2_rviz_plugins/GoalTool`）或 **"Navigation 2"** 面板点击目标位姿；Nav2 栈通过 `/navigate_to_pose` 动作接收。同样的目标也可从命令行发送：
 
 ```bash
 # 向 Nav2 导航栈发送目标点
@@ -243,10 +247,10 @@ tensorboard --logdir models/tensorboard
 ### TF 树
 
 ```
-map ──(静态恒等)──> odom ──(由 qpos 动态生成)──> base_link
-                                                    ├──> laser（静态）
-                                                    └──> camera_rgb（静态）
+map ──(静态恒等)──> odom ──(由 qpos 动态生成)──> base_link ──(robot_state_publisher)──> laser
 ```
+
+`base_link → laser` 从简化 URDF [models/stretch_description.urdf](models/stretch_description.urdf) 读取，由 `robot_state_publisher`（随 `make nav2` 启动）发布，因此激光坐标系在 RViz 和代价地图中始终可用，无需仿真器硬编码。
 
 ---
 
@@ -273,9 +277,11 @@ Stretch3_Simulation/
 ├── pyproject.toml               # pip install -e . + CLI 入口
 ├── config/
 │   ├── actions.yaml             # 微动作 & 宏动作定义
-│   └── nav2_params.yaml         # Nav2 控制器/规划器/代价地图参数
-├── launch/nav2_sim.launch.py    # Nav2 导航栈
+│   ├── nav2_params.yaml         # Nav2 控制器/规划器/代价地图参数
+│   └── nav2_view.rviz           # RViz 布局（机器人模型、激光、代价地图、目标点工具）
+├── launch/nav2_sim.launch.py    # Nav2 导航栈（Nav2 + robot_state_publisher + RViz）
 ├── models/                      # MuJoCo 场景 + RL 检查点 + TensorBoard 日志
+│   └── stretch_description.urdf # RViz 用简化机器人模型（robot_state_publisher）
 ├── src/stretch_sim/             # 库：导航、IK、RL 环境、锚点、路径
 ├── scripts/                     # 仿真节点、CLI、PID/MPC/RL 控制器、训练脚本
 ├── tools/                       # 模型工具（gen_laser.py、网格工具等）

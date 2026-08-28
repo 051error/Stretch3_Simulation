@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!-- Simplified, visual-only URDF for RViz.
+
+     The robot geometry is approximate (a base box + mast + laser marker).
+     It exists so that robot_state_publisher can publish /robot_description
+     and the base_link -> laser transform; the simulator publishes the dynamic
+     odom -> base_link transform from the MuJoCo state.
+-->
+<robot name="stretch">
+  <material name="base_grey"><color rgba="0.35 0.35 0.40 1"/></material>
+  <material name="mast_grey"><color rgba="0.60 0.60 0.65 1"/></material>
+  <material name="laser_red"><color rgba="1.00 0.00 0.00 1"/></material>
+
+  <link name="base_link">
+    <inertial>
+      <mass value="20.0"/>
+      <inertia ixx="0.4" ixy="0.0" ixz="0.0" iyy="0.4" iyz="0.0" izz="0.4"/>
+    </inertial>
+    <visual>
+      <geometry>
+        <box size="0.34 0.34 0.16"/>
+      </geometry>
+      <origin xyz="0 0 0.08" rpy="0 0 0"/>
+      <material name="base_grey"/>
+    </visual>
+    <visual>
+      <geometry>
+        <box size="0.12 0.12 0.5"/>
+      </geometry>
+      <origin xyz="0 0 0.4" rpy="0 0 0"/>
+      <material name="mast_grey"/>
+    </visual>
+  </link>
+
+  <link name="laser">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="laser_red"/>
+    </visual>
+  </link>
+
+  <joint name="base_to_laser" type="fixed">
+    <parent link="base_link"/>
+    <child link="laser"/>
+    <!-- The MuJoCo laser body is mounted with a 180 deg yaw (quat "0 0 0 1"), so
+         this rpy must match it or the LaserScan rays would be interpreted 180 deg
+         rotated in the costmaps. -->
+    <origin xyz="0.004 0 0.1664" rpy="0 0 3.14159"/>
+  </joint>
+</robot>
